@@ -8,7 +8,7 @@
 (setq auto-save-default -1)
 ;; 设置自动注释的快捷键
 (global-set-key (kbd "C-x /") 'comment-or-uncomment-region)
-
+(global-set-key (kbd "C-x r") 'set-mark-command)
 
 (load-file "~/.emacs.d/my_macro.el")
 (global-set-key (kbd "C-x n RET") 'next-lines)
@@ -45,9 +45,6 @@
 (require 'package)
 (add-to-list 'package-archives
        '("melpa" . "http://melpa.org/packages/") t)
-;;(add-to-list 'package-archives '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/"))
-
-;;(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/"))
 
 
 (package-initialize)
@@ -59,7 +56,6 @@
     ein
     elpy
     flycheck
-    material-theme
     py-autopep8))
 
 (mapc #'(lambda (package)
@@ -67,71 +63,43 @@
       (package-install package)))
       myPackages)
 
-;; BASIC CUSTOMIZATION
-;; --------------------------------------
 
-;;(setq inhibit-startup-message t) ;; hide the startup message
+(setq inhibit-startup-message t) ;; hide the startup message
 ;;(load-theme 'material t) ;; load material theme
 (load-theme 'monokai t) ;; load material theme
 (global-linum-mode t) ;; enable line numbers globally
 
-;;(exec-path-from-shell-copy-env "PATH")
-;;(setq python-python-command "/Library/Frameworks/Python.framework/Versions/2.7/bin/python")
-;;(setq python-python-command "~/env/bin/python")
-;;(require 'python-mode)
 
 ;; PYTHON CONFIGURATION
 ;; --------------------------------------
 
-;(require "python2")
-;(setq python-command "ipython")
 (elpy-enable)
-;;(elpy-use-ipython)
-;;(require 'evil)
-;;(evil-mode 1)
+(require 'evil)
+(evil-mode 1)
+;; 默认是emacs模式
+(setq evil-default-state 'emacs)
+;; 按C-o之后按命令是使用vim模式
+(define-key evil-emacs-state-map (kbd "C-o") 'evil-execute-in-normal-state) 
+
 ;; use flycheck not flymake with elpy
 (when (require 'flycheck nil t)
   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
   (add-hook 'elpy-mode-hook 'flycheck-mode))
 
-;;(require 'virtualenvwrapper)
-;;(venv-initialize-interactive-shells) ;; if you want interactive shell support
-;;(venv-initialize-eshell) ;; if you want eshell support
-;; note that setting `venv-location` is not necessary if you
-;; use the default location (`~/.virtualenvs`), or if the
-;; the environment variable `WORKON_HOME` points to the right place
-;;(setq venv-location "/Users/mac/.pyenv")
 ;; enable autopep8 formatting on save
-;;(require 'py-autopep8)
-;;(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+(require 'py-autopep8)
+(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
 
-;; autocomple
-;;(load-file "~/.emacs.d/auto-complete/auto-complete.el")
-(add-to-list 'load-path "~/.emacs.d/lisp/auto-complete")
-(require 'auto-complete-config)
-(ac-config-default)
+(require 'anaconda-mode)
+(add-hook 'python-mode-hook 'anaconda-mode)
+(add-hook 'python-mode-hook 'anaconda-eldoc-mode)
 
 
-;; pymacs
-(load-file "~/env/src/pymacs/pymacs.el")
-(autoload 'pymacs-apply "pymacs")
-(autoload 'pymacs-call "pymacs")
-(autoload 'pymacs-eval "pymacs" nil t)
-(autoload 'pymacs-exec "pymacs" nil t)
-(autoload 'pymacs-load "pymacs" nil t)
-(pymacs-load "ropemacs" "rope-")
+;; python-mode
+(require 'python-mode)
+(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+(add-to-list 'interpreter-mode-alist '("python" . python-mode))
 
-;; pycomplete & python-mode
-(load-file "~/.emacs.d/python-mode.el")
-(load-file "~/.emacs.d/pycomplete.el")
-(require 'pycomplete)
-(setq auto-mode-alist (cons '("\\.py$" . python-mode) auto-mode-alist))
-(autoload 'python-mode "python-mode" "Python editing mode." t)
-(setq interpreter-mode-alist(cons '("python" . python-mode)
-				  interpreter-mode-alist))
-;; path to the python interpreter, e.g.: ~rw/python27/bin/python2.7
-;;(setq py-python-command "python") ;; 上面已经设置了
-(autoload 'python-mode "python-mode" "Python editing mode." t)
 
 ;;fold-python
 (load-file "~/.emacs.d/fold-python.el")
@@ -144,9 +112,7 @@
 (require 'window-numbering)
 (window-numbering-mode 1)
 
-;;org-mode
-(add-to-list 'load-path "~/.emacs.d/org-9.0.9/lisp")
-(add-to-list 'load-path "~/.emacs.d/org-9.0.9/contrib/lisp" t)
+
 
 ;;yasnippet 创建模版文件用的插件
 (add-to-list 'load-path
@@ -156,38 +122,20 @@
 
 (yas-reload-all)
 (add-hook 'prog-mode-hook #'yas-minor-mode)
-;;(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
-;; '(column-number-mode t)
-;; '(current-language-environment "UTF-8")
-;; '(display-time-mode t)
-;; '(package-selected-packages
-;;   (quote
-;;    (py-autopep8 flycheck elpy ein material-theme better-defaults)))
-;; '(size-indication-mode t))
-;(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
-;; )
+
+
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(column-number-mode t)
- '(display-battery-mode t)
- '(display-time-mode t)
- '(size-indication-mode t)
- '(tool-bar-mode nil))
+ '(package-selected-packages
+   (quote
+    (window-numbering smex shell-command python-switch-quotes python-mode python-info python-environment python-docstring python-django pyimport pyim-basedict py-autopep8 pos-tip multi-term monokai-theme material-theme magit-popup flycheck evil elpy ein company-anaconda better-defaults autopair ansi))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-
